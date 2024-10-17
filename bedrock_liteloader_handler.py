@@ -39,6 +39,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     # 18:31:04 INFO [Server] Player disconnected: Elec glacier, xuid: 2535434141566614
     # 21:53:36 ERROR [Server] Unknown command: 123. Please check that the command exists and that you have permission to use it.",
 
+
     @override
     def get_name(self) -> str:
         return 'liteloader_handler'
@@ -47,10 +48,10 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     @override
     def get_content_parsing_formatter(cls) -> re.Pattern:
         return re.compile(
-            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2}) '
-            r'(?P<logging>\w+)'
-            r'( \[[^]]+])'  # thread -> P<thread>
-            r' (?P<content>.*)'
+            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2}) '  # 捕获时间部分：小时、分钟、秒
+            r'(?P<logging>\w+)'  # 捕获日志级别：INFO, ERROR等
+            r' (?:\[[^\]]+\])? '  # 匹配日志来源（如[Server]，可选）
+            r'(?P<content>.+)'  # 捕获整个日志消息内容，包括玩家名称和日志内容
         )
 
     @override
@@ -79,54 +80,56 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     # ***处理玩家信息的总逻辑
     @override
-    def parse_server_stdout(self, text: str):
-        info = super().parse_server_stdout(text)
-        if info.player is None:
-            m = re.fullmatch(r'<(?P<name>[^>]+)> (?P<message>.*)', info.content)    # 似乎A~ mine hand前面有个[Not secure],这里重写了一遍玩家规则匹配
-            if m is not None:   # TODO: verify legal player name
-                info.player, info.message = m.group('name'), m.group('message')
-        return info
+    def parse_server_stdout(self, text: str) -> Info:
+        # print(text + ' I am old')
+        # ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+        # text = ansi_escape.sub('', text)
+        # print(text + ' new')
+        result = super().parse_server_stdout(text)
+        # 下面print(result)是测试正则结果
+        # print(result)
+
+        # content里提取玩家有问题，暂时注释，后续重写
+        # for parser in self.__get_player_message_parsers():
+        #     if isinstance(parser, parse.Parser):
+        #         parsed = parser.parse(result.content)  # TODO: drop parse.Parser support
+        #     else:
+        #         parsed = parser.fullmatch(result.content)
+        #     if parsed is not None and self._verify_player_name(parsed['name']):
+        #         result.player, result.content = parsed['name'], parsed['message']
+        #         break
+        return result
 
     # ***玩家进入和离开，需要重写
     # __player_joined_regex = re.compile(r'(?P<name>[^\[]+)\[(.*?)] logged in with entity id \d+ at \(.+\)')
-
     @override
     def parse_player_joined(self, info: Info) -> Optional[str]:
         pass
 
-    __player_joined_regex = re.compile(r'Player connected: (?P<name>[^>]+), xuid: (?P<xuid>\d+)')
-
-    # Player disconnected: Elec glacier, xuid: 2535434141566614
     # Steve left the game
     # __player_left_regex = re.compile(r'(?P<name>[^ ]+) left the game')
     @override
     def parse_player_left(self, info: Info) -> Optional[str]:
         pass
 
-    __player_left_regex = re.compile(r'Player disconnected: (?P<name>[^>]+), xuid: (?P<xuid>\d+)')
-
     # ***确定服务器版本，需要重写
     # __server_version_regex = re.compile(r'Version: (?P<version>.+)')
-    # Version: 1.20.15.01(ProtocolVersion 594) with LiteLoaderBDS 2.15.0+50eb265
     @override
     def parse_server_version(self, info: Info) -> Optional[str]:
         pass
 
     # ***这是确定服务器的ip和端口，需要重写
     # __server_address_regex = re.compile(r'IPv4 supported, port: (?P<ip>\S+):(?P<port>\d+)')
-    # IPv4 supported, port: 19132: Used for gameplay and LAN discovery
     @override
     def parse_server_address(self, info: Info) -> Optional[Tuple[str, int]]:
         pass
 
-    __server_address_regex = re.compile(r'IPv4 supported, port: (?P<port>\d+): Used for gameplay and LAN discovery')
     # ***检测日志知道服务器的启动完成,需要重写
     # eg: 14:29:50:782 INFO [Server] Server started.
     # __server_startup_done_regex = re.compile(
     #     r'Done \([0-9.]+s\)! For help, type "help"'
     #     r'( or "\?")?'  # mc < 1.13
     # )
-
     @override
     def test_server_startup_done(self, info: Info) -> bool:
         pass
@@ -139,3 +142,4 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
 def on_load(server, prev_module):
     server.register_server_handler(BedrockServerHandler())
+
