@@ -9,7 +9,7 @@ MCDReforged
 
 ![MCDR-banner](https://raw.githubusercontent.com/MCDReforged/MCDReforged/master/logo/images/logo_long.png)
 
-[English](https://github.com/MCDReforged/MCDReforged/blob/master/README.md) | **中文**
+[English](https://github.com/Elec-Glacier/liteloaderv2_handler/blob/main/README.md) | **中文**
 
 > 这是一个基于 Python 的 Minecraft 服务端控制工具
 
