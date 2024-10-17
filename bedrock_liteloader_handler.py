@@ -15,7 +15,7 @@ bedrock server handler
 
 PLUGIN_METADATA = {
     'id': 'bedrock_server',
-    'version': '0.0.1',
+    'version': '0.1.0',
     'name': 'handling BDS with liteloader modded',
     'description': 'A plugin for bedrock server',
     'author': 'jiangyan03, Elec_glacier',
@@ -48,10 +48,10 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     @override
     def get_content_parsing_formatter(cls) -> re.Pattern:
         return re.compile(
-            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2}) '  # 捕获时间部分：小时、分钟、秒
-            r'(?P<logging>\w+)'  # 捕获日志级别：INFO, ERROR等
-            r' (?:\[[^\]]+\])? '  # 匹配日志来源（如[Server]，可选）
-            r'(?P<content>.+)'  # 捕获整个日志消息内容，包括玩家名称和日志内容
+            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2}) '
+            r'(?P<logging>\w+)'
+            r'( \[[^]]+])'  # thread -> P<thread> #r' (?:\[[^\]]+\])? '
+            r' (?P<content>.*)'
         )
 
     @override
@@ -78,52 +78,40 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     #     str]:
     #     return self.get_send_message_command('@a', message, server_information)
 
-    # ***处理玩家信息的总逻辑
-    @override
-    def parse_server_stdout(self, text: str) -> Info:
-        # print(text + ' I am old')
-        # ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
-        # text = ansi_escape.sub('', text)
-        # print(text + ' new')
-        result = super().parse_server_stdout(text)
-        # 下面print(result)是测试正则结果
-        # print(result)
-
-        # content里提取玩家有问题，暂时注释，后续重写
-        # for parser in self.__get_player_message_parsers():
-        #     if isinstance(parser, parse.Parser):
-        #         parsed = parser.parse(result.content)  # TODO: drop parse.Parser support
-        #     else:
-        #         parsed = parser.fullmatch(result.content)
-        #     if parsed is not None and self._verify_player_name(parsed['name']):
-        #         result.player, result.content = parsed['name'], parsed['message']
-        #         break
-        return result
+    # ***处理玩家信息的总逻辑不需要重写
+    # @override
+    # def parse_server_stdout(self, text: str):
+    #     pass
 
     # ***玩家进入和离开，需要重写
     # __player_joined_regex = re.compile(r'(?P<name>[^\[]+)\[(.*?)] logged in with entity id \d+ at \(.+\)')
+    __player_joined_regex = re.compile(r'Player connected: (?P<name>[^>]+), xuid: (?P<xuid>\d+)')
     @override
     def parse_player_joined(self, info: Info) -> Optional[str]:
         pass
 
     # Steve left the game
     # __player_left_regex = re.compile(r'(?P<name>[^ ]+) left the game')
+    __player_left_regex = re.compile(r'Player disconnected: (?P<name>[^>]+), xuid: (?P<xuid>\d+)')
     @override
     def parse_player_left(self, info: Info) -> Optional[str]:
         pass
 
     # ***确定服务器版本，需要重写
     # __server_version_regex = re.compile(r'Version: (?P<version>.+)')
+    # Version: 1.20.15.01(ProtocolVersion 594) with LiteLoaderBDS 2.15.0+50eb265
     @override
     def parse_server_version(self, info: Info) -> Optional[str]:
         pass
 
     # ***这是确定服务器的ip和端口，需要重写
     # __server_address_regex = re.compile(r'IPv4 supported, port: (?P<ip>\S+):(?P<port>\d+)')
+    # IPv4 supported, port: 19132: Used for gameplay and LAN discovery
     @override
     def parse_server_address(self, info: Info) -> Optional[Tuple[str, int]]:
         pass
 
+    __server_address_regex = re.compile(r'IPv4 supported, port: (?P<port>\d+): Used for gameplay and LAN discovery')
     # ***检测日志知道服务器的启动完成,需要重写
     # eg: 14:29:50:782 INFO [Server] Server started.
     # __server_startup_done_regex = re.compile(
@@ -139,7 +127,15 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     def test_server_stopping(self, info: Info) -> bool:
         return info.is_from_server and info.content == 'Stopping server...'
 
+    __player_name_regex = re.compile(r'[^>]{3,16}')
+
+    @classmethod
+    @override
+    def _verify_player_name(cls, name: str):
+        return cls.__player_name_regex.fullmatch(name) is not None
+
 
 def on_load(server, prev_module):
     server.register_server_handler(BedrockServerHandler())
+
 
