@@ -17,4 +17,10 @@ MCDReforged (abbreviated as MCDR) is a tool which provides the management abilit
 
 From in-game calculator, player high-light, to manipulate scoreboard, manage structure file and backup / load backup, you can implement these by using MCDR and related plugins
 
-This is for bds
+**This is for bds**
+
+## Document
+
+MCDReforged github https://github.com/MCDReforged/MCDReforged
+
+Check https://docs.mcdreforged.com/ for more details of MCDR
