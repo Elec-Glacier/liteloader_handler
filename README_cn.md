@@ -17,4 +17,11 @@ MCDReforged（以下简称 MCDR）是一个可以在完全不对 Minecraft 服�
 
 小至计算器、高亮玩家、b 站弹幕姬，大至操控计分板、管理结构文件、自助备份回档，都可以通过 MCDR 及相配套的插件实现
 
-这里添加了基岩板的服务端处理器，让mcdr能够适用于bds~
+**这里添加了基岩板的服务端处理器，让mcdr能够适用于bds~**
+
+## 文档
+
+MCDReforged github：https://github.com/MCDReforged/MCDReforged
+
+想要了解更多关于 MCDR 的详情？去看文档吧 https://docs.mcdreforged.com/zh_CN/latest/
+
