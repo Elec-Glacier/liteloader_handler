@@ -13,11 +13,11 @@ bedrock server handler
 
 PLUGIN_METADATA = {
     'id': 'bedrock_server',
-    'version': '0.1.5',
+    'version': '0.1.6',
     'name': 'handling BDS with liteloader modded',
     'description': 'A plugin for bedrock server',
     'author': 'jiangyan03, Elec_glacier',
-    'link': 'https://github.com/jiangyan03/MCDReforged-addbedrock',
+    'link': 'https://github.com/Elec-Glacier/liteloader_handler'
 }
 
 
@@ -61,13 +61,14 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def get_send_message_command(self, target: str, message: MessageText, server_information: ServerInformation):
-        can_do_execute = False  # je的，暂时不需要
+        # je的，暂时不需要
+        # can_do_execute = False
         # print(self.format_message(message))  # 服务端输出message，调试作用
-        command = 'say {}'.format(self.format_message(message))
+        # command = 'say {}'.format(self.format_message(message))
         # command = 'tell {} {}'.format(target, self.format_message(message))
-        # command = 'tellraw {} {}'.format(target, self.format_message(message)) json不适配，暂时注释
-        if can_do_execute:
-            command = 'execute at @p run ' + command
+        command = 'tellraw {} {}'.format(target, self.format_message(message)) # json不适配，暂时注释
+        # if can_do_execute:
+        #     command = 'execute at @p run ' + command
         return command
 
     # -------------------------
@@ -166,6 +167,20 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     @override
     def _verify_player_name(cls, name: str):
         return cls.__player_name_regex.fullmatch(name) is not None
+
+    @override
+    def format_message(cls, message: MessageText) -> str:
+        """
+        A utility method to convert a message into a valid argument used in message sending command
+        """
+        message = f"{{\"rawtext\":[{{\"text\":\"{message}\"}}]}}"
+        # 我知道这样很蠢，但是这只是权宜之计（，后续修改
+        # print(message)
+        return message
+        # if isinstance(message, RTextBase):
+        #     return message.to_json_str()
+        # else:
+        #     return json.dumps(str(message))
 
 
 def on_load(server, prev_module):
