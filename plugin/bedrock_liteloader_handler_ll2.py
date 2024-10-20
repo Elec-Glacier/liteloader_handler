@@ -57,7 +57,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def get_send_message_command(self, target: str, message: MessageText, server_information: ServerInformation):
-        return 'tellraw {} {}'.format(target, self.format_message(message))
+        return 'tellraw "{}" {}'.format(target, self.format_message(message))
 
     # 服务端信息分离，没有特殊修改勿动
     @override
