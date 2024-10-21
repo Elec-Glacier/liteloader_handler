@@ -20,7 +20,7 @@ PLUGIN_METADATA = {
     'id': 'bedrock_server_ll2&1',
     'version': '0.2.3',
     'name': 'handling BDS with liteloader modded',
-    'description': 'A plugin for bedrock server ll2&1',
+    'description': 'A plugin for bedrock server ll2—1',
     'author': 'jiangyan03, Elec_glacier',
     'link': 'https://github.com/Elec-Glacier/liteloader_handler'
 }
@@ -33,7 +33,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def get_name(self) -> str:
-        return 'liteloader_handler_ll2&1'
+        return 'liteloader_handler_ll2-1'
 
     @classmethod
     @override
