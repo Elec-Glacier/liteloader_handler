@@ -48,10 +48,6 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
 
     @override
-    def get_stop_command(self) -> str:
-        return 'stop'
-
-    @override
     def get_send_message_command(self, target: str, message: MessageText, server_information: ServerInformation):
         can_do_execute = False
         if server_information.version is not None:
@@ -83,7 +79,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
             result.player = '"' + result.player + '"'
         return result
 
-    __player_joined_regex = re.compile(r'Player Spawned: (?P<name>[^>]+) xuid: (?P<xuid>\d+)')
+    __player_joined_regex = re.compile(r'Player Connected: (?P<name>[^>]+) xuid: (?P<xuid>\d+)') #  ll1似乎不会有Spawned
 
     @override
     def parse_player_joined(self, info: Info):
