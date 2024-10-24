@@ -1,3 +1,5 @@
+[English](https://github.com/Elec-Glacier/liteloader_handler/blob/main/README.md) | **中文**
+
 Bedrock_handler
 --------
 一个让基岩版也能使用MCDR及其插件的服务端处理器

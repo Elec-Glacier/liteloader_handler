@@ -5,22 +5,20 @@ from typing_extensions import override
 
 from mcdreforged.handler.impl import AbstractMinecraftHandler
 from mcdreforged.info_reactor.server_information import ServerInformation
-from mcdreforged.minecraft.rtext.text import RTextBase, RText, RTextList, RTextTranslation
-from mcdreforged.plugin.meta.version import VersionParsingError
+from mcdreforged.minecraft.rtext.text import RTextBase
 from mcdreforged.plugin.si.server_interface import ServerInterface
 from mcdreforged.utils.types.message import MessageText
 from mcdreforged.info_reactor.info import Info
-from mcdreforged.plugin.meta.version import Version
 
 """
 bedrock server handler
 """
 
 PLUGIN_METADATA = {
-    'id': 'bedrock_server_ll2&1',
-    'version': '0.2.3',
-    'name': 'handling BDS with liteloader modded',
-    'description': 'A plugin for bedrock server ll2—1',
+    'id': 'bedrock_server_ll3',
+    'version': '0.2.4',
+    'name': 'handling BDS with LeviLamina modded',
+    'description': 'A plugin for bedrock server with LeviLamina modded',
     'author': 'jiangyan03, Elec_glacier',
     'link': 'https://github.com/Elec-Glacier/liteloader_handler'
 }
@@ -28,42 +26,31 @@ PLUGIN_METADATA = {
 
 class BedrockServerHandler(AbstractMinecraftHandler):
     """
-    A bedrock server handler, handling BDS with liteloader modded
+    A bedrock server handler, handling BDS with LeviLamina modded
     """
 
     @override
     def get_name(self) -> str:
-        return 'liteloader_handler_ll2-1'
+        return 'LeviLamina_handler_ll3'
 
+    # 16:24:14.099 INFO [PlayerChat] <Elec glacier> !!MCDR
     @classmethod
     @override
     def get_content_parsing_formatter(cls) -> re.Pattern:
         return re.compile(
-            r'>?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\s'
-            r'(?P<logging>\w+)'
-            r']?\s?'
-            r'(\[[^]]+])\s'  # thread -> P<thread> not use
-            r'(?P<content>.*)'
+            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\.(.*)'
+            r' (?P<logging>\w+)'
+            r' (\[[^]]+])'
+            r' (?P<content>.*)'
         )
-
 
     @override
     def get_send_message_command(self, target: str, message: MessageText, server_information: ServerInformation):
-        can_do_execute = False
-        if server_information.version is not None:
-            try:
-                # from mcdreforged.plugin.meta.version import Version
-                version = Version(server_information.version.split(' ')[0])
-                if version >= Version('1.19.50.0'):
-                    can_do_execute = True
-            except VersionParsingError:
-                pass
+        # can_do_execute = True # Version > 1.19.50
         command = 'tellraw {} {}'.format(target, self.format_message(message))
-        if can_do_execute:
-            command = 'execute at @p run ' + command
+        command = 'execute at @p run ' + command
         return command
 
-    # MCDR 获取服务端信息
     @override
     def pre_parse_server_stdout(self, text: str) -> str:
         # 除去特殊字符串，由于获取1.18.2输出的时候会出现\x08这种操作符，故需要预处理一下服务端的输出
@@ -79,7 +66,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
             result.player = '"' + result.player + '"'
         return result
 
-    __player_joined_regex = re.compile(r'Player Connected: (?P<name>[^>]+) xuid: (?P<xuid>\d+)') #  ll1似乎不会有Spawned
+    __player_joined_regex = re.compile(r'Player Spawned: (?P<name>[^>]+) xuid: (?P<xuid>\d+)')
 
     @override
     def parse_player_joined(self, info: Info):
@@ -99,7 +86,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
                     return '"' + m['name'] + '"'
         return None
 
-    __server_version_regex = re.compile(r'Version:? (?P<version>.+)\((.*)')
+    __server_version_regex = re.compile(r'Version: (?P<version>.+)\((.*)')
 
     @override
     def parse_server_version(self, info: Info):
@@ -114,7 +101,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     def parse_server_address(self, info: Info):
         if not info.is_user:
             server_information: ServerInformation = ServerInterface.get_instance().get_server_information()
-            if server_information.port is None: # 1.19以下的bds会输出两个ipv4
+            if server_information.port is None:
                 if (m := self.__server_address_regex.fullmatch(info.content)) is not None:
                     # 基岩板无法获取ip哦
                     return "127.0.0.1", int(m['port'])
@@ -122,7 +109,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     # ***检测日志知道服务器的启动完成
     __server_startup_done_regex = re.compile(
-        r'(Server started(.*))|(Thanks to RhyMC\(rhymc\.com\) for the support)'  # 1.19.0-1.20.30 ll2/1.17-1.18.30 ll1 or 1.20.30+ ll3
+        r'Server started in \([0-9.]+s\)! For help. type "help" or "\?"'
     )
 
     @override
@@ -148,7 +135,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         def replace_utf8_chars(message_):
             replace_dict = {
                 '↻': 'R',  # 替换为 [R] 表示刷新
-                '↓': 'D',  # 替换为 [V] 表示下载
+                '↓': 'D',  # 替换为 [D] 表示下载
                 '×': 'X',  # 替换为 [X] 表示关闭
             }
             # 替换列表中每个字符串元素
@@ -165,11 +152,9 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         except:
             pass
         message = f"{{\"rawtext\":[{{\"text\":\"{message}\"}}]}}"
-        # RText需要修改的内容太多了，beje的命令格式不一致，需要大改，只能暂时直接输入命令了
+        # RText需要修改的内容太多了，be je的命令格式不一致，需要大改，只能暂时直接输入命令了
         # 我知道这样很蠢，但是这只是权宜之计（，后续修改
         return message
-
-
 
 def on_load(server, prev_module):
     server.register_server_handler(BedrockServerHandler())
