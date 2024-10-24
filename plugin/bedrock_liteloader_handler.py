@@ -18,7 +18,7 @@ bedrock server handler
 
 PLUGIN_METADATA = {
     'id': 'bedrock_server',
-    'version': '0.2.3',
+    'version': '0.2.4',
     'name': 'handling BDS with liteloader modded',
     'description': 'A plugin for bedrock server',
     'author': 'jiangyan03, Elec_glacier',
@@ -78,9 +78,9 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     #     )
 
 
-    @override
-    def get_stop_command(self) -> str:
-        return 'stop'
+    # @override
+    # def get_stop_command(self) -> str:
+    #     return 'stop'
 
     @override
     def get_send_message_command(self, target: str, message: MessageText, server_information: ServerInformation):
@@ -198,7 +198,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         def replace_utf8_chars(message_):
             replace_dict = {
                 '↻': 'R',  # 替换为 [R] 表示刷新
-                '↓': 'D',  # 替换为 [V] 表示下载
+                '↓': 'D',  # 替换为 [D] 表示下载
                 '×': 'X',  # 替换为 [X] 表示关闭
             }
             # 替换列表中每个字符串元素
