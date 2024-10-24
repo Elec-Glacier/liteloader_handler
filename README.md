@@ -1,3 +1,5 @@
+**English** | [中文](https://github.com/Elec-Glacier/liteloaderv2_handler/blob/master/README_cn.md)
+
 Bedrock server handler
 --------
 A handler which allows BDS(bedrock dedicated server) to use MCDR and its massive plugins.
