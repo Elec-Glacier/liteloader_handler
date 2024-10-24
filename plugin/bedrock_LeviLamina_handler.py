@@ -17,8 +17,8 @@ bedrock server handler
 PLUGIN_METADATA = {
     'id': 'bedrock_server_ll3',
     'version': '0.2.4',
-    'name': 'handling BDS with liteloader modded',
-    'description': 'A plugin for bedrock server ll3',
+    'name': 'handling BDS with LeviLamina modded',
+    'description': 'A plugin for bedrock server with LeviLamina modded',
     'author': 'jiangyan03, Elec_glacier',
     'link': 'https://github.com/Elec-Glacier/liteloader_handler'
 }
@@ -26,12 +26,12 @@ PLUGIN_METADATA = {
 
 class BedrockServerHandler(AbstractMinecraftHandler):
     """
-    A bedrock server handler, handling BDS with liteloader modded
+    A bedrock server handler, handling BDS with LeviLamina modded
     """
 
     @override
     def get_name(self) -> str:
-        return 'liteloader_handler_ll3'
+        return 'LeviLamina_handler_ll3'
 
     # 16:24:14.099 INFO [PlayerChat] <Elec glacier> !!MCDR
     @classmethod
