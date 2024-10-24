@@ -1,4 +1,4 @@
-[English](https://github.com/Elec-Glacier/liteloaderv2_handler/blob/master/README.md) | **中文**
+[English](https://github.com/Elec-Glacier/liteloader_handler/blob/main/README.md) | **中文**
 
 Bedrock_handler
 --------
