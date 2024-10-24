@@ -17,10 +17,10 @@ bedrock server handler
 """
 
 PLUGIN_METADATA = {
-    'id': 'bedrock_server_ll2&1',
-    'version': '0.2.3',
+    'id': 'bedrock_server_LL2',
+    'version': '0.2.4',
     'name': 'handling BDS with liteloader modded',
-    'description': 'A plugin for bedrock server ll2—1',
+    'description': 'A plugin for bedrock server with liteloader modded',
     'author': 'jiangyan03, Elec_glacier',
     'link': 'https://github.com/Elec-Glacier/liteloader_handler'
 }
@@ -33,7 +33,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def get_name(self) -> str:
-        return 'liteloader_handler_ll2-1'
+        return 'liteloader_handler_LL2'
 
     @classmethod
     @override
@@ -148,7 +148,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         def replace_utf8_chars(message_):
             replace_dict = {
                 '↻': 'R',  # 替换为 [R] 表示刷新
-                '↓': 'D',  # 替换为 [V] 表示下载
+                '↓': 'D',  # 替换为 [D] 表示下载
                 '×': 'X',  # 替换为 [X] 表示关闭
             }
             # 替换列表中每个字符串元素
