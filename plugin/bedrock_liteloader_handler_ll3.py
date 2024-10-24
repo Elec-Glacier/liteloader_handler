@@ -16,7 +16,7 @@ bedrock server handler
 
 PLUGIN_METADATA = {
     'id': 'bedrock_server_ll3',
-    'version': '0.2.3',
+    'version': '0.2.4',
     'name': 'handling BDS with liteloader modded',
     'description': 'A plugin for bedrock server ll3',
     'author': 'jiangyan03, Elec_glacier',
@@ -46,10 +46,9 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def get_send_message_command(self, target: str, message: MessageText, server_information: ServerInformation):
-        can_do_execute = True
+        # can_do_execute = True # Version > 1.19.50
         command = 'tellraw {} {}'.format(target, self.format_message(message))
-        if can_do_execute:
-            command = 'execute at @p run ' + command
+        command = 'execute at @p run ' + command
         return command
 
     @override
@@ -136,7 +135,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         def replace_utf8_chars(message_):
             replace_dict = {
                 '↻': 'R',  # 替换为 [R] 表示刷新
-                '↓': 'D',  # 替换为 [V] 表示下载
+                '↓': 'D',  # 替换为 [D] 表示下载
                 '×': 'X',  # 替换为 [X] 表示关闭
             }
             # 替换列表中每个字符串元素
