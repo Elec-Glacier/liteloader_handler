@@ -70,12 +70,12 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     # @override
     # def get_content_parsing_formatter(cls) -> re.Pattern:
     #     return re.compile(
-    #         r'>?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\s'
-    #         r'(?P<logging>\w+)'
-    #         r']?\s?'
-    #         r'(\[[^]]+])\s'  # thread -> P<thread> not use
-    #         r'(?P<content>.*)'
+    #         r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\.(.*)'
+    #         r' (?P<logging>\w+)'
+    #         r' (\[[^]]+])'
+    #         r' (?P<content>.*)'
     #     )
+
 
 
     # @override
