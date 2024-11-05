@@ -16,7 +16,7 @@ bedrock server handler
 
 PLUGIN_METADATA = {
     'id': 'bedrock_server_ll3',
-    'version': '0.2.4',
+    'version': '0.2.5',
     'name': 'handling BDS with LeviLamina modded',
     'description': 'A plugin for bedrock server with LeviLamina modded',
     'author': 'jiangyan03, Elec_glacier',
@@ -151,7 +151,16 @@ class BedrockServerHandler(AbstractMinecraftHandler):
             message = replace_utf8_chars(message)
         except:
             pass
-        message = f"{{\"rawtext\":[{{\"text\":\"{message}\"}}]}}"
+        lines = message.splitlines()
+        json_message = []
+        for line in lines:
+            json_message.append({"text": line})
+            json_message.append({"text": "\n"})
+        # 移除最后换行
+        if json_message and json_message[-1] == {"text": "\n"}:
+            json_message.pop()
+        output = json.dumps(json_message)
+        message = f"{{\"rawtext\":{output}}}"
         # RText需要修改的内容太多了，be je的命令格式不一致，需要大改，只能暂时直接输入命令了
         # 我知道这样很蠢，但是这只是权宜之计（，后续修改
         return message
