@@ -18,7 +18,7 @@ bedrock server handler
 
 PLUGIN_METADATA = {
     'id': 'bedrock_server',
-    'version': '0.2.4',
+    'version': '0.2.5',
     'name': 'handling BDS with liteloader modded',
     'description': 'A plugin for bedrock server',
     'author': 'jiangyan03, Elec_glacier',
