@@ -215,6 +215,16 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         except:
             pass
 
+        lines = message.splitlines()
+        json_message = []
+        for line in lines:
+            json_message.append({"text": line})
+            json_message.append({"text": "\n"})
+        # 移除最后换行
+        if json_message and json_message[-1] == {"text": "\n"}:
+            json_message.pop()
+        output = json.dumps(json_message)
+        message = f"{{\"rawtext\":{output}}}"
         # RText需要修改的内容太多了，beje的命令格式不一致，需要大改，只能暂时直接输入命令了
         # if isinstance(message, RTextBase):
         #     print('RTextBase')
@@ -222,7 +232,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         # else:
         #     print('ELSE')
         #     print(json.dumps(str(message)))
-        message = f"{{\"rawtext\":[{{\"text\":\"{message}\"}}]}}"
+        # message = f"{{\"rawtext\":[{{\"text\":\"{message}\"}}]}}"
         # 我知道这样很蠢，但是这只是权宜之计（，后续修改
         # print(message)
         return message
