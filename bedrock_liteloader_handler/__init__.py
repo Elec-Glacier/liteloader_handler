@@ -31,23 +31,6 @@ class Config(Serializable):
     )
 config: Config
 
-class BDSCustomHandler(BedrockServerHandler):
-
-    custom_regex_pattern: re.Pattern = re.compile('')  # 占位符，稍后动态设置
-    @classmethod
-    @override
-    def get_content_parsing_formatter(cls) -> re.Pattern:
-        if not cls.custom_regex_pattern:
-            raise ValueError("正则定义有问题")
-        return cls.custom_regex_pattern
-
-    @classmethod
-    def set_custom_regex(cls, pattern: str):
-        try:
-            cls.custom_regex_pattern = re.compile(pattern)
-        except re.error as e:
-            raise ValueError(f"无效的正则表达式: {pattern}") from e
-
 def on_load(server, prev_module):
     global config
     config = server.load_config_simple(
