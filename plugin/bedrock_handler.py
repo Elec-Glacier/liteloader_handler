@@ -197,9 +197,9 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         # 由于ll2一部分服务端会出现gbk输入，所以为了防止utf8字符变成gbk出现编码错误，需要预处理输入命令
         def replace_utf8_chars(message_):
             replace_dict = {
-                '↻': 'R',  # 替换为 [R] 表示刷新
-                '↓': 'D',  # 替换为 [D] 表示下载
-                '×': 'X',  # 替换为 [X] 表示关闭
+                '[↻]': '',  # 替换为 [R] 表示刷新
+                '[↓]': '',  # 替换为 [D] 表示下载
+                '[×]': '',  # 替换为 [X] 表示关闭
             }
             # 替换列表中每个字符串元素
             if isinstance(message_, RTextBase):
