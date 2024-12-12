@@ -1,0 +1,15 @@
+{
+  "id": "bedrock_liteloader_handler",
+  "version": "1.0.0",
+  "name": "BedrockLiteloaderHandler",
+  "description": {
+    "en_us": "A handler which allows BDS(bedrock dedicated server) to use MCDR",
+    "zh_cn": "一个让基岩版也能使用MCDR的处理器"
+  },
+  "author": [
+    "Elec glacier",
+    "jiangyan"
+  ],
+  "link":"https://github.com/Elec-Glacier/liteloader_handler",
+  "dependencies": {}
+}

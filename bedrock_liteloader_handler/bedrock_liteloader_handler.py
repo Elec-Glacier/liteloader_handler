@@ -1,29 +1,16 @@
-import json
 import re
+import json
 
 from typing_extensions import override
 
 from mcdreforged.handler.impl import AbstractMinecraftHandler
 from mcdreforged.info_reactor.server_information import ServerInformation
-from mcdreforged.minecraft.rtext.text import RTextBase, RText, RTextList, RTextTranslation
+from mcdreforged.minecraft.rtext.text import RTextBase
 from mcdreforged.plugin.meta.version import VersionParsingError
 from mcdreforged.plugin.si.server_interface import ServerInterface
 from mcdreforged.utils.types.message import MessageText
 from mcdreforged.info_reactor.info import Info
 from mcdreforged.plugin.meta.version import Version
-
-"""
-bedrock server handler
-"""
-
-PLUGIN_METADATA = {
-    'id': 'bedrock_server_LL2',
-    'version': '0.2.5',
-    'name': 'handling BDS with liteloader modded',
-    'description': 'A plugin for bedrock server with liteloader modded',
-    'author': 'jiangyan03, Elec_glacier',
-    'link': 'https://github.com/Elec-Glacier/liteloader_handler'
-}
 
 
 class BedrockServerHandler(AbstractMinecraftHandler):
@@ -33,7 +20,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def get_name(self) -> str:
-        return 'liteloader_handler_LL2'
+        return 'bedrock_liteloader_handler'
 
     @classmethod
     @override
@@ -116,7 +103,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
             server_information: ServerInformation = ServerInterface.get_instance().get_server_information()
             if server_information.port is None: # 1.19以下的bds会输出两个ipv4
                 if (m := self.__server_address_regex.fullmatch(info.content)) is not None:
-                    # 基岩板无法获取ip哦
+                    # 基岩板无法获取ip
                     return "127.0.0.1", int(m['port'])
         return None
 
@@ -174,11 +161,5 @@ class BedrockServerHandler(AbstractMinecraftHandler):
             json_message.pop()
         output = json.dumps(json_message)
         message = f"{{\"rawtext\":{output}}}"
-        # RText需要修改的内容太多了，beje的命令格式不一致，需要大改，只能暂时直接输入命令了
-        # 我知道这样很蠢，但是这只是权宜之计（，后续修改
+        #TODO:unicode fix
         return message
-
-
-
-def on_load(server, prev_module):
-    server.register_server_handler(BedrockServerHandler())
