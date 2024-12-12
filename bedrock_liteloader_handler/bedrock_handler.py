@@ -15,24 +15,23 @@ from mcdreforged.plugin.meta.version import Version
 
 class BedrockServerHandler(AbstractMinecraftHandler):
     """
-    A bedrock server handler, handling BDS with liteloader modded
+    A bedrock server handler, handling BDS with modded
     """
 
     @override
     def get_name(self) -> str:
-        return 'bedrock_liteloader_handler'
+        return 'BDS_handler'
 
     @classmethod
     @override
     def get_content_parsing_formatter(cls) -> re.Pattern:
         return re.compile(
-            r'>?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\s'
+            r'>?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})(?:\.\d+)?\s'
             r'(?P<logging>\w+)'
             r']?\s?'
             r'(\[[^]]+])\s'  # thread -> P<thread> not use
             r'(?P<content>.*)'
         )
-
 
     @override
     def get_send_message_command(self, target: str, message: MessageText, server_information: ServerInformation):
@@ -53,7 +52,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     # MCDR 获取服务端信息
     @override
     def pre_parse_server_stdout(self, text: str) -> str:
-        # 除去特殊字符串，由于获取1.18.2输出的时候会出现\x08这种操作符，故需要预处理一下服务端的输出
+        # 除去特殊字符串，由于获取BDS输出的时候会出现\x08等操作符，故需要预处理一下服务端的输出
         cleaned_text = ''.join(char for char in text if char not in '\x08\x00-\x1F\x7F')
         return cleaned_text
 
@@ -66,7 +65,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
             result.player = '"' + result.player + '"'
         return result
 
-    __player_joined_regex = re.compile(r'Player Connected: (?P<name>[^>]+) xuid: (?P<xuid>\d+)') #  ll1似乎不会有Spawned
+    __player_joined_regex = re.compile(r'Player Connected: (?P<name>[^>]+) xuid: (?P<xuid>\d+)')  #  ll1似乎不会有Spawned
 
     @override
     def parse_player_joined(self, info: Info):
@@ -101,7 +100,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     def parse_server_address(self, info: Info):
         if not info.is_user:
             server_information: ServerInformation = ServerInterface.get_instance().get_server_information()
-            if server_information.port is None: # 1.19以下的bds会输出两个ipv4
+            if server_information.port is None:  # 1.19以下的bds会输出两个ipv4
                 if (m := self.__server_address_regex.fullmatch(info.content)) is not None:
                     # 基岩板无法获取ip
                     return "127.0.0.1", int(m['port'])
@@ -109,7 +108,8 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     # ***检测日志知道服务器的启动完成
     __server_startup_done_regex = re.compile(
-        r'(Server started(.*))|(Thanks to RhyMC\(rhymc\.com\) for the support)'  # 1.19.0-1.20.30 ll2/1.17-1.18.30 ll1 or 1.20.30+ ll3
+        r'(Server started(.*))|(Thanks to RhyMC\(rhymc\.com\) for the support)'
+        # 1.19.0-1.20.30 ll2/1.17-1.18.30 ll1 or 1.20.30+ ll3
     )
 
     @override
@@ -130,26 +130,9 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def format_message(self, message: MessageText) -> str:
-        # 获取服务端的编码暂时搁置，后续写
-        # 由于ll2一部分服务端会出现gbk输入，所以为了防止utf8字符变成gbk出现编码错误，需要预处理输入命令
-        def replace_utf8_chars(message_):
-            replace_dict = {
-                '[↻]': '',  # 替换为 [R] 表示刷新
-                '[↓]': '',  # 替换为 [D] 表示下载
-                '[×]': '',  # 替换为 [X] 表示关闭
-            }
-            # 替换列表中每个字符串元素
-            if isinstance(message_, RTextBase):
-                message_str = str(message_)
-                for old, new in replace_dict.items():
-                    updated_text = message_str.replace(old, new)
-                    message_str = updated_text
-                return message_str
-            return message_
-
         try:
-            message = replace_utf8_chars(message)
-        except:
+            message = self.replace_special_chars(message)
+        finally:
             pass
         lines = message.splitlines()
         json_message = []
@@ -163,3 +146,107 @@ class BedrockServerHandler(AbstractMinecraftHandler):
         message = f"{{\"rawtext\":{output}}}"
         #TODO:unicode fix
         return message
+
+    @classmethod
+    def replace_special_chars(cls, message):
+        replace_dict = {
+            '[↻]': '',  #
+            '[↓]': '',  #
+            '[×]': '',  #
+        }
+        # 替换列表中每个字符串元素
+        if isinstance(message, RTextBase):
+            message_str = str(message)
+            for old, new in replace_dict.items():
+                updated_text = message_str.replace(old, new)
+                message_str = updated_text
+            return message_str
+        return message
+
+
+class BDSLiteloaderHandler(BedrockServerHandler):
+    @override
+    def get_name(self) -> str:
+        return 'BDS_Liteloader_handler'
+
+    @classmethod
+    @override
+    def get_content_parsing_formatter(cls) -> re.Pattern:
+        return re.compile(
+            r'>?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\s'
+            r'(?P<logging>\w+)'
+            r']?\s?'
+            r'(\[[^]]+])\s'  # thread -> P<thread> not use
+            r'(?P<content>.*)'
+        )
+
+
+class BDSLeviLaminaHandler(BedrockServerHandler):
+    @override
+    def get_name(self) -> str:
+        return 'BDS_LeviLamina_handler'
+
+    @classmethod
+    @override
+    def get_content_parsing_formatter(cls) -> re.Pattern:
+        return re.compile(
+            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\.(.*)'
+            r' (?P<logging>\w+)'
+            r' (\[[^]]+])'
+            r' (?P<content>.*)'
+        )
+
+
+class BDSEndstoreHandler(BedrockServerHandler):
+    @override
+    def get_name(self) -> str:
+        return 'BDS_Endstore_handler'
+
+    @classmethod
+    @override
+    def get_content_parsing_formatter(cls) -> re.Pattern:
+        return re.compile(
+            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\.(.*)'
+            r' (?P<logging>\w+)'
+            r' (\[[^]]+])'
+            r' (?P<content>.*)'
+        )
+
+
+class BDSScriptHandler(BedrockServerHandler):
+    @override
+    def get_name(self) -> str:
+        return 'BDS_script_handler'
+
+    @classmethod
+    @override
+    def get_content_parsing_formatter(cls) -> re.Pattern:
+        return re.compile(
+            r'\[(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})'
+            r' (?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2}):(.*)'
+            r' (?P<logging>\w+)]'
+            r'( \[[^]]+])?( \[[^]]+])? '
+            r'(?P<content>.*)'
+        )
+
+
+class BDSCustomHandler(BedrockServerHandler):
+    @override
+    def get_name(self) -> str:
+        return 'BDS_Custom_handler'
+
+    custom_regex_pattern: re.Pattern = re.compile('')  # 占位符，稍后动态设置
+    @classmethod
+    @override
+    def get_content_parsing_formatter(cls) -> re.Pattern:
+        if not cls.custom_regex_pattern:
+            raise ValueError("正则定义有问题")
+        return cls.custom_regex_pattern
+
+    @classmethod
+    def set_custom_regex(cls, pattern: str):
+        try:
+            cls.custom_regex_pattern = re.compile(pattern)
+            return True  # 正则验证通过
+        except re.error as e:
+            raise ValueError(f"无效的正则表达式: {pattern}") from e
