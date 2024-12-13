@@ -1,34 +1,24 @@
-import re
-import json
-from typing import Optional, Any
-from typing_extensions import override
-
 from mcdreforged.api.utils import Serializable
-from .bedrock_handler import BedrockServerHandler, BDSLeviLaminaHandler, BDSScriptHandler, BDSLiteloaderHandler, \
-    BDSCustomHandler
+from .bedrock_handler import BedrockServerHandler, BDSLeviLaminaHandler, BDSLiteloaderHandler, BDSCustomHandler,BDSEndstoneHandler
 
 DEFAULT_CONFIG = {
     "handler": "BDS",
-    "regex_pattern": (
-        r">?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})(?:\.\d+)?\s"
-        r"(?P<logging>\w+)"
-        r"]?\s?"
-        r"(\[[^]]+])\s"  
-        r"(?P<content>.*)"
-    )
+    "regex_pattern": ""
 }
 
 
 class Config(Serializable):
-    handler_comment: str = "handler选择值如下: BDS, Liteloader, LeviLamina, Endstore, Script, Custom"
+    handler_comment: str = "handler to choose: BDS, Liteloader, LeviLamina, Custom"
     handler: str = 'BDS'
+    Custom_stdout_example: str = '[2024-12-14 06:31:00:773 INFO] [Scripting] [Chat] <Elec glacier> !!MCDR'
     regex_pattern: str = (
-        r">?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})(?:\.\d+)?\s"
-        r"(?P<logging>\w+)"
-        r"]?\s?"
-        r"(\[[^]]+])\s"  
-        r"(?P<content>.*)"
-    )
+            r'\[(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})'
+            r' (?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2}):(.*)'
+            r' (?P<logging>\w+)]'
+            r'( \[[^]]+])?( \[[^]]+])? '
+            r'(?P<content>.*)'
+        )
+
 config: Config
 
 def on_load(server, prev_module):
@@ -40,32 +30,29 @@ def on_load(server, prev_module):
     )
 
     if config.handler == 'Liteloader':
-        server.logger.info(f"使用Liteloader加载器")
+        server.logger.info(f"Loading Liteloader handler")
         server.register_server_handler(BDSLiteloaderHandler())
     elif config.handler == 'LeviLamina':
-        server.logger.info(f"使用LeviLamina加载器")
+        server.logger.info(f"Loading LeviLamina_handler")
         server.register_server_handler(BDSLeviLaminaHandler())
-    elif config.handler == 'Endstore':
-        server.logger.info(f"Endstore加载器暂时没实现，将使用默认的BDS基类加载器")
-        # server.register_server_handler(BDSEndstoreHandler())
-        server.register_server_handler(BedrockServerHandler())
-    elif config.handler == 'Script':
-        server.logger.info(f"使用原版的script api输出加载器")
-        server.register_server_handler(BDSScriptHandler())
+    elif config.handler == 'Endstone':
+        server.logger.info(f"Loading Endstone_handler")
+        server.register_server_handler(BDSEndstoneHandler())
     elif config.handler == 'BDS':
-        server.logger.info(f"将使用默认的BDS基类加载器")
+        server.logger.info(f"Loading default BDS_handler")
         server.register_server_handler(BedrockServerHandler())
     elif config.handler == 'Other' or config.handler == 'Custom':
-        server.logger.info(f"将使用自定义正则加载器")
+        server.logger.info(f"Loading custom regex")
         try:
             BDSCustomHandler.set_custom_regex(config.regex_pattern)
-            server.logger.info(f"自定义正确，将使用自定义正则加载器")
+            server.logger.info(f"regex defined correctly, loading custom regex")
             server.register_server_handler(BDSCustomHandler())
         except ValueError as e:
-            server.logger.info(f"自定义错误,错误是:{e} \n 将使用默认的BDS基类加载器")
+            server.logger.error(f"Invalid custom regex: {e}")
+            server.logger.error(f"Regex error, going to load default BDS_handler")
             server.register_server_handler(BedrockServerHandler())
     else:
-        server.logger.info(f"加载器填写错误，将使用默认的BDS基类加载器")
+        server.logger.error(f"Invalid handler: {config.handler}; Going to load default BDS_handler")
         server.register_server_handler(BedrockServerHandler())
 
 
