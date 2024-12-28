@@ -12,7 +12,7 @@ class Config(Serializable):
     handler: str = 'BDS'
     Custom_stdout_example: str = '[2024-12-14 06:31:00:773 INFO] [Scripting] [Chat] <Elec glacier> !!MCDR'
     regex_pattern: str = (
-            r'\[(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})'
+            r'\[(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})'
             r' (?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2}):(.*)'
             r' (?P<logging>\w+)]'
             r'( \[[^]]+])?( \[[^]]+])? '
