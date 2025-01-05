@@ -1,15 +1,19 @@
 from mcdreforged.api.utils import Serializable
-from .bedrock_handler import BedrockServerHandler, BDSLeviLaminaHandler, BDSLiteloaderHandler, BDSCustomHandler,BDSEndstoneHandler
+
+from .bedrock_handler import BedrockServerHandler
+from .liteloader_handler import BDSLiteloaderHandler
+from .levilamina_handler import  BDSLeviLaminaHandler
+from .custom_handler import BDSCustomHandler
 
 DEFAULT_CONFIG = {
-    "handler": "BDS",
+    "handler": "Liteloader",
     "regex_pattern": ""
 }
 
 
 class Config(Serializable):
     handler_comment: str = "handler to choose: BDS, Liteloader, LeviLamina, Custom"
-    handler: str = 'BDS'
+    handler: str = 'Liteloader'
     Custom_stdout_example: str = '[2024-12-14 06:31:00:773 INFO] [Scripting] [Chat] <Elec glacier> !!MCDR'
     regex_pattern: str = (
             r'\[(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})'
@@ -35,9 +39,6 @@ def on_load(server, prev_module):
     elif config.handler == 'LeviLamina':
         server.logger.info(f"Loading LeviLamina_handler")
         server.register_server_handler(BDSLeviLaminaHandler())
-    elif config.handler == 'Endstone':
-        server.logger.info(f"Loading Endstone_handler")
-        server.register_server_handler(BDSEndstoneHandler())
     elif config.handler == 'BDS':
         server.logger.info(f"Loading default BDS_handler")
         server.register_server_handler(BedrockServerHandler())

@@ -15,13 +15,8 @@ from mcdreforged.plugin.meta.version import Version
 
 class BedrockServerHandler(AbstractMinecraftHandler):
     """
-    A bedrock server handler, handling BDS with modded
+    A bedrock server handler, handling BDS stdout
     """
-
-    # [05:45:37 Info][Chat] <Elec glacier> !!MCDR   //liteloader
-    # 05:52:33 INFO [Chat] <Elec glacier> !!MCDR    //liteloader v2
-    # 05:57:13.995 INFO [PlayerChat] <Elec glacier> !!MCDR  //levilamina
-    # [2024-12-14 05:14:30.007 INFO] [Server] <Elec glacier> !!MCDR //Endstone
 
     @override
     def get_name(self) -> str:
@@ -64,6 +59,8 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     @override
     def parse_server_stdout(self, text: str):
         result = super().parse_server_stdout(text)
+        if result.content.startswith('/'):
+            result.content = ""
         if result.player is not None:
             result.player = '"' + result.player + '"'
         return result
@@ -149,9 +146,12 @@ class BedrockServerHandler(AbstractMinecraftHandler):
     @classmethod
     def replace_special_chars(cls, message):
         replace_dict = {
-            '[↻]': '',  #
-            '[↓]': '',  #
-            '[×]': '',  #
+            '[↻]': '',
+            '[↓]': '',
+            '[×]': '',
+            '[✎]': '',
+            '[>]': '',
+            '[x]': ''
         }
         # 替换列表中每个字符串元素
         if isinstance(message, RTextBase):
@@ -161,75 +161,3 @@ class BedrockServerHandler(AbstractMinecraftHandler):
                 message_str = updated_text
             return message_str
         return message
-
-class BDSLiteloaderHandler(BedrockServerHandler):
-    @override
-    def get_name(self) -> str:
-        return 'BDS_Liteloader_handler'
-
-    @classmethod
-    @override
-    def get_content_parsing_formatter(cls) -> re.Pattern:
-        return re.compile(
-            r'>?\s?\[?(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\s'
-            r'(?P<logging>\w+)'
-            r']?\s?'
-            r'(\[(?P<thread>[^]]+)])\s'  # thread -> P<thread> not use
-            r'(?P<content>.*)'
-        )
-
-
-    # ll1没有'Server started.'
-    __server_startup_done_regex = re.compile(
-        r'(Server started(.*))|(Thanks to RhyMC\(rhymc\.com\) for the support)'
-    )
-
-    # ll1没有Spawned
-    __player_joined_regex = re.compile(r'Player connected: (?P<name>[^>]+) xuid: (?P<xuid>\d+)(.*)')
-
-
-class BDSLeviLaminaHandler(BedrockServerHandler):
-    @override
-    def get_name(self) -> str:
-        return 'BDS_LeviLamina_handler'
-
-    @classmethod
-    @override
-    def get_content_parsing_formatter(cls) -> re.Pattern:
-        return re.compile(
-            r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\.(.*)'
-            r' (?P<logging>\w+)'
-            r' (\[[^]]+])'
-            r' (?P<content>.*)'
-        )
-
-    __server_startup_done_regex = re.compile(
-        r'Server started in \([0-9.]+s\)! For help. type "help" or "\?"'
-    )
-
-class BDSEndstoneHandler(BedrockServerHandler):
-    @override
-    def get_name(self) -> str:
-        return 'BDS_Endstone_handler'
-# Endstone的输出跟BDS差不多, 奇怪的是指令输出不了，可以正确解析，但指令无法运行，不知道是不是Endstone也是python构建的原因
-
-class BDSCustomHandler(BedrockServerHandler):
-    @override
-    def get_name(self) -> str:
-        return 'BDS_Custom_handler'
-
-    custom_regex_pattern: re.Pattern = re.compile('')  # 占位符，稍后动态设置
-    @classmethod
-    @override
-    def get_content_parsing_formatter(cls) -> re.Pattern:
-        if not cls.custom_regex_pattern:
-            raise ValueError("Error in regex defining")
-        return cls.custom_regex_pattern
-
-    @classmethod
-    def set_custom_regex(cls, pattern: str):
-        try:
-            cls.custom_regex_pattern = re.compile(pattern)
-            return True  # 正则验证通过
-        except re.error as e:
-            raise ValueError(f"Invalid regex: {pattern}") from e
