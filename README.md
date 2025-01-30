@@ -14,6 +14,9 @@ So it is recommended to use a behavior pack or modify BDS to std out your chat l
 4. Change and choose the handler in mcdreforged "config" directory
 5. reload the config
 
+## Notice
+After version 1.2.0, this handler has adapted to PrimeBackup. You can turn it off in config.
+
 ## MCDR plugins installation notice
 Since Bedrock and Java edition are different in many aspects, so read the introductions of other MCDR plugins you want to use and make sure them would work correctly before you place them into plugins directory.
 
