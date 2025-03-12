@@ -4,7 +4,8 @@ from typing_extensions import override
 from .bedrock_handler import BedrockServerHandler
 from mcdreforged.info_reactor.info import Info
 
-# 05:57:13.995 INFO [PlayerChat] <Elec glacier> !!MCDR  //levilamina
+# 05:57:13.995 INFO [PlayerChat] <Elec glacier> !!MCDR  //levilamina@0.1.0
+# 10:40:27.771 INFO [LeviLamina] [PlayerChat] <Elec glacier> !!MCDR  //levilamina@1.0.0
 
 class BDSLeviLaminaHandler(BedrockServerHandler):
     """
@@ -20,6 +21,7 @@ class BDSLeviLaminaHandler(BedrockServerHandler):
         return re.compile(
             r'(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\.(.*)'
             r' (?P<logging>\w+)'
+            r'( \[[^]]+])?'    # after levilamina@1.0.0
             r' (\[[^]]+])'
             r' (?P<content>.*)'
         )
