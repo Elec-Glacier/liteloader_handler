@@ -15,6 +15,7 @@ So it is recommended to use a behavior pack or modify BDS to std out your chat l
 5. reload the config
 
 ## Notice
+After LeviLamina@1.0.0, Popen() can't get stdout after server being modded. You can use a pty terminal as bridge. You can see more details in [this issue](https://github.com/Elec-Glacier/liteloader_handler/issues/13)
 After version 1.2.0, this handler has adapted to PrimeBackup. You can turn it off in config.
 
 ## MCDR plugins installation notice
