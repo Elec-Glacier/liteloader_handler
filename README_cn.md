@@ -14,6 +14,7 @@
 5. 重载配置文件
 
 ## 注意
+LeviLamina的1.0.0版本后，MCDR无法获取更改过的服务端输出。你可以使用一个支持pty的应用作为桥梁。[更多细节](https://github.com/Elec-Glacier/liteloader_handler/issues/13)
 1.2.0版本后，对PrimeBackup做了专门的适配。你可以在config里关掉。
 
 ## MCDR插件安装注意
