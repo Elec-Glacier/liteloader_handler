@@ -51,9 +51,9 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     # 除去特殊字符串，由于获取BDS输出的时候会出现\x08等操作符，故需要预处理一下服务端的输出
     @override
-    def pre_parse_server_stdout(self, text: str) -> str:
-        # cleaned_text = ''.join(char for char in text if char == '\x1B' or char > '\x1F' and char != '\x7F')需要测试，如果无bug则启用这个
-        cleaned_text = ''.join(char for char in text if char not in '\x08\x00\x1F\x7F')
+        def pre_parse_server_stdout(self, text: str) -> str:
+        clean_char= ''.join(char for char in text if char == '\x1B' or char > '\x1F' and char != '\x7F')
+        cleaned_text = re.sub(r'\x1b\[[0-9;?]*[A-Za-z]', '', clean_char)
         return cleaned_text
 
     # 由于xboxid存在\s空格字符串，玩家id必须引号处理命令
