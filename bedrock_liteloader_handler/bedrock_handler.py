@@ -51,8 +51,11 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     # 除去特殊字符串，由于获取BDS输出的时候会出现\x08等操作符，故需要预处理一下服务端的输出
     @override
-        def pre_parse_server_stdout(self, text: str) -> str:
-        clean_char= ''.join(char for char in text if char == '\x1B' or char > '\x1F' and char != '\x7F')
+    def pre_parse_server_stdout(self, text: str) -> str:
+        # \x1B是ESC，控制台会输出有颜色字符，需要用到这个转义字符，我们就不在这过滤了，MCDR有这个处理
+        clean_char = ''.join(char for char in text if char == '\x1B' or char > '\x1F' and char != '\x7F')
+        # clean_Characters = ''.join(char for char in text if char not in '\x08\x00\x1F\x7F')
+        # 2025.3.14 : 还有其他的的转义字符，还是得自己除去，MCDR处理不了
         cleaned_text = re.sub(r'\x1b\[[0-9;?]*[A-Za-z]', '', clean_char)
         return cleaned_text
 
@@ -128,10 +131,7 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @override
     def format_message(self, message: MessageText) -> str:
-        try:
-            message = self.replace_special_chars(message)
-        finally:
-            pass
+        message = self.replace_special_chars(message)
         lines = message.splitlines()
         json_message = []
         for line in lines:
@@ -146,19 +146,13 @@ class BedrockServerHandler(AbstractMinecraftHandler):
 
     @classmethod
     def replace_special_chars(cls, message):
-        replace_dict = {
-            '[↻]': '',
-            '[↓]': '',
-            '[×]': '',
-            '[✎]': '',
-            '[>]': '',
-            '[x]': ''
-        }
-        # 替换列表中每个字符串元素
         if isinstance(message, RTextBase):
-            message_str = str(message)
-            for old, new in replace_dict.items():
-                updated_text = message_str.replace(old, new)
-                message_str = updated_text
-            return message_str
+            # 优先使用 to_legacy_text 保留颜色代码与格式代码,把非基岩板实现的字符全部去除
+            if hasattr(message, 'to_legacy_text'):
+                message_str = message.to_legacy_text()
+            else:
+                message_str = str(message)
+            # 替换列表中每个字符串元素
+            pattern = r'\[↻]|\[↓]|\[×]|\[✎]|\[>]'
+            return re.sub(pattern, '', message_str)
         return message
